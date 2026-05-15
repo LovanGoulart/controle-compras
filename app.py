@@ -492,7 +492,12 @@ def compras():
 @app.route('/compra/<int:id>/excluir', methods=['POST'])
 @login_required
 def excluir_compra(id):
+
     usuario_id = session['usuario_id']
+
+    # PEGA O MÊS ATUAL DA TELA
+    mes = request.form.get('mes', '')
+
     db = get_db()
     cursor = db.cursor()
 
@@ -500,13 +505,28 @@ def excluir_compra(id):
         "SELECT id FROM compras WHERE id=? AND usuario_id=?",
         (id, usuario_id)
     )
+
     if not cursor.fetchone():
-        flash("Compra nao encontrada", "erro")
+        flash("Compra não encontrada", "erro")
+
+        if mes:
+            return redirect(f'/compras?mes={mes}')
+
         return redirect('/compras')
 
-    cursor.execute("DELETE FROM compras WHERE id=?", (id,))
+    cursor.execute(
+        "DELETE FROM compras WHERE id=?",
+        (id,)
+    )
+
     db.commit()
+
     flash("Compra excluída com sucesso!", "sucesso")
+
+    # VOLTA PARA O MESMO MÊS
+    if mes:
+        return redirect(f'/compras?mes={mes}')
+
     return redirect('/compras')
 
 # ---------------- ERRO HANDLERS ----------------
