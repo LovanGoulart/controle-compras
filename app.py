@@ -90,7 +90,7 @@ with app.app_context():
 # ---------------- UTILITARIOS ----------------
 def formatar_mes(mes):
     meses = {
-        "01": "Janeiro", "02": "Fevereiro", "03": "Marco", "04": "Abril",
+        "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril",
         "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto",
         "09": "Setembro", "10": "Outubro", "11": "Novembro", "12": "Dezembro"
     }
@@ -117,18 +117,18 @@ def validar_senha_forte(senha):
     if len(senha) < 8:
         return False, "Senha deve ter no minimo 8 caracteres"
     if not re.search(r"[A-Z]", senha):
-        return False, "Senha deve conter pelo menos uma letra maiuscula"
+        return False, "Senha deve conter pelo menos uma letra maiúscula"
     if not re.search(r"[a-z]", senha):
-        return False, "Senha deve conter pelo menos uma letra minuscula"
+        return False, "Senha deve conter pelo menos uma letra minúscula"
     if not re.search(r"[0-9]", senha):
-        return False, "Senha deve conter pelo menos um numero"
+        return False, "Senha deve conter pelo menos um número"
     return True, None
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'usuario_id' not in session:
-            flash("Faca login para acessar esta pagina", "erro")
+            flash("Faça login para acessar esta página", "erro")
             return redirect('/login')
         return f(*args, **kwargs)
     return decorated_function
@@ -188,7 +188,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash("Voce saiu do sistema", "sucesso")
+    flash("Voce entrou no sistema", "sucesso")
     return redirect('/login')
 
 # ---------------- CADASTRO ----------------
@@ -206,7 +206,7 @@ def cadastro():
             mensagem = "Nome deve ter no minimo 3 caracteres"
             tipo = "erro"
         elif not validar_email_seguro(email):
-            mensagem = "Email invalido"
+            mensagem = "Email inválido"
             tipo = "erro"
         else:
             senha_valida, erro_senha = validar_senha_forte(senha)
@@ -230,7 +230,7 @@ def cadastro():
                     tipo = "sucesso"
 
                 except sqlite3.IntegrityError:
-                    mensagem = "Este e-mail ja esta cadastrado!"
+                    mensagem = "Este e-mail já está cadastrado!"
                     tipo = "erro"
 
     return render_template('cadastro.html', mensagem=mensagem, tipo=tipo)
@@ -317,13 +317,13 @@ def cadastrar():
                 flash("Valor deve ser maior que zero", "erro")
                 return redirect('/cadastrar')
         except (ValueError, TypeError):
-            flash("Valor invalido", "erro")
+            flash("Valor inválido", "erro")
             return redirect('/cadastrar')
 
         try:
             parcelas = int(request.form.get('parcelas', 1))
             if parcelas < 1 or parcelas > 48:
-                flash("Numero de parcelas invalido (max: 48)", "erro")
+                flash("Número de parcelas inválido (max: 48)", "erro")
                 return redirect('/cadastrar')
         except (ValueError, TypeError):
             parcelas = 1
@@ -331,7 +331,7 @@ def cadastrar():
         try:
             data_inicial = datetime.strptime(request.form.get('data'), '%Y-%m-%d')
         except (ValueError, TypeError):
-            flash("Data invalida", "erro")
+            flash("Data inválida", "erro")
             return redirect('/cadastrar')
 
         valor_parcela = round(valor_total / parcelas, 2)
@@ -506,13 +506,13 @@ def excluir_compra(id):
 
     cursor.execute("DELETE FROM compras WHERE id=?", (id,))
     db.commit()
-    flash("Compra excluida com sucesso!", "sucesso")
+    flash("Compra excluída com sucesso!", "sucesso")
     return redirect('/compras')
 
 # ---------------- ERRO HANDLERS ----------------
 @app.errorhandler(404)
 def not_found(error):
-    return render_template('erro.html', codigo=404, mensagem="Pagina nao encontrada"), 404
+    return render_template('erro.html', codigo=404, mensagem="Página não encontrada"), 404
 
 @app.errorhandler(500)
 def internal_error(error):

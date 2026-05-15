@@ -1,75 +1,365 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+<style>
+
+h2{
+    margin-bottom:20px;
+}
+
+/* FILTRO */
+
+.filtro-form{
+    margin-bottom:18px;
+}
+
+.filtro-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+.input-month,
+.input-busca{
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #ddd;
+    font-size:14px;
+}
+
+.input-busca{
+    flex:1;
+    min-width:220px;
+}
+
+/* BOTÕES */
+
+.btn-buscar,
+.btn-limpar{
+    padding:12px 16px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:bold;
+    text-decoration:none;
+    transition:0.2s;
+}
+
+.btn-buscar{
+    background:#4CAF50;
+    color:white;
+}
+
+.btn-buscar:hover{
+    background:#43a047;
+}
+
+.btn-limpar{
+    background:#e0e0e0;
+    color:#333;
+}
+
+.btn-limpar:hover{
+    background:#d5d5d5;
+}
+
+/* INFO */
+
+.info-bar{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:15px;
+    font-size:14px;
+    color:#666;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+/* TABELA */
+
+.table-container{
+    width:100%;
+    overflow-x:auto;
+}
+
+.tabela{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.tabela th{
+    background:#ff5a5a;
+    color:white;
+    padding:14px;
+    text-align:left;
+    font-size:14px;
+}
+
+.tabela td{
+    padding:14px;
+    border-bottom:1px solid #eee;
+    font-size:14px;
+}
+
+.tabela tr:hover{
+    background:#fafafa;
+}
+
+.valor{
+    font-weight:bold;
+    color:#2e7d32;
+}
+
+/* BOTÃO EXCLUIR */
+
+.btn-excluir{
+    width:40px;
+    height:40px;
+
+    border:none;
+    border-radius:12px;
+
+    background:#ff4d4d;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+.btn-excluir:hover{
+    background:#e53935;
+    transform:scale(1.08);
+}
+
+.form-excluir{
+    display:flex;
+    justify-content:center;
+}
+
+/* SVG */
+
+.icone-lixeira{
+    width:18px;
+    height:18px;
+    fill:white;
+}
+
+/* PAGINAÇÃO */
+
+.paginacao{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+    margin-top:22px;
+    flex-wrap:wrap;
+}
+
+.btn-pagina{
+    background:#ff5a5a;
+    color:white;
+    padding:10px 16px;
+    border-radius:12px;
+    text-decoration:none;
+    transition:0.2s;
+}
+
+.btn-pagina:hover{
+    background:#f44336;
+}
+
+.pagina-atual{
+    font-weight:bold;
+    color:#555;
+}
+
+</style>
+
 <h2>🛒 Compras</h2>
 
 <form method="GET" id="formFiltro" class="filtro-form">
+
     <div class="filtro-row">
-        <input type="month" name="mes" value="{{ mes or '' }}" onchange="this.form.submit();" class="input-month">
-        <input type="text" name="busca" value="{{ busca or '' }}" placeholder="Buscar por local ou produto..." class="input-busca">
-        <button type="submit" class="btn-buscar">Buscar</button>
+
+        <input
+            type="month"
+            name="mes"
+            value="{{ mes or '' }}"
+            onchange="this.form.submit();"
+            class="input-month">
+
+        <input
+            type="text"
+            name="busca"
+            value="{{ busca or '' }}"
+            placeholder="Buscar por local ou produto..."
+            class="input-busca">
+
+        <button type="submit" class="btn-buscar">
+            Buscar
+        </button>
+
         {% if busca %}
-            <a href="/compras?mes={{ mes }}" class="btn-limpar">Limpar</a>
+            <a href="/compras?mes={{ mes }}" class="btn-limpar">
+                Limpar
+            </a>
         {% endif %}
+
     </div>
+
 </form>
 
 <div class="info-bar">
     <span>{{ total_registros }} compra(s) encontrada(s)</span>
-    <span>Mes: {{ mes_formatado }}</span>
+    <span>{{ mes_formatado }}</span>
 </div>
 
 <div class="table-container">
+
     <table class="tabela">
+
         <thead>
+
             <tr>
                 <th>Local</th>
                 <th>Produto</th>
-                <th class="valor">Valor (R$)</th>
+                <th>Valor</th>
                 <th>Data</th>
-                <th>Ações</th>
+                <th>Excluir</th>
             </tr>
+
         </thead>
+
         <tbody>
+
         {% if compras and compras|length > 0 %}
+
             {% for c in compras %}
+
             <tr>
+
                 <td>{{ c.local }}</td>
+
                 <td>{{ c.produto }}</td>
+
                 <td class="valor">
-                    R$ {{ "{:,.2f}".format(c.valor).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                    {{ "{:,.2f}".format(c.valor).replace(",", "X").replace(".", ",").replace("X", ".") }}
                 </td>
+
                 <td>{{ c.data }}</td>
+
                 <td>
-                    <form method="POST" action="/compra/{{ c.id }}/excluir" class="form-excluir" onsubmit="return confirm('Tem certeza que deseja excluir esta compra?');">
-                        <button type="submit" class="btn-excluir" aria-label="Excluir compra">
-                            <i class="bi bi-trash-fill"></i>
+
+                    <form
+                        method="POST"
+                        action="/compra/{{ c.id }}/excluir"
+                        class="form-excluir"
+                        onsubmit="return confirm('Tem certeza que deseja excluir esta compra?');">
+
+                        <button
+                            type="submit"
+                            class="btn-excluir"
+                            aria-label="Excluir compra">
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 16 16"
+                                class="icone-lixeira">
+
+                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+
+                                <path fill-rule="evenodd"
+                                d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1 0-2H5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1h2.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+
+                            </svg>
+
                         </button>
+
                     </form>
+
                 </td>
+
             </tr>
+
             {% endfor %}
+
         {% else %}
+
             <tr>
-                <td colspan="5" style="text-align:center; padding: 30px;">
-                    <i class="bi bi-inbox" style="font-size: 40px; color: #ccc;"></i>
-                    <p style="color: #888; margin-top: 10px;">Nenhuma compra encontrada</p>
+
+                <td colspan="5" style="text-align:center; padding:35px;">
+
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="48"
+                        height="48"
+                        fill="#ccc"
+                        viewBox="0 0 16 16">
+
+                        <path d="M4 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H4z"/>
+
+                    </svg>
+
+                    <p style="color:#888; margin-top:12px;">
+                        Nenhuma compra encontrada
+                    </p>
+
                 </td>
+
             </tr>
+
         {% endif %}
+
         </tbody>
+
     </table>
+
 </div>
 
 {% if total_paginas > 1 %}
+
 <div class="paginacao">
+
     {% if pagina > 1 %}
-        <a href="/compras?mes={{ mes }}&busca={{ busca }}&pagina={{ pagina - 1 }}" class="btn-pagina">&lsaquo; Anterior</a>
+
+        <a
+            href="/compras?mes={{ mes }}&busca={{ busca }}&pagina={{ pagina - 1 }}"
+            class="btn-pagina">
+
+            &lsaquo; Anterior
+
+        </a>
+
     {% endif %}
-    <span class="pagina-atual">Pagina {{ pagina }} de {{ total_paginas }}</span>
+
+    <span class="pagina-atual">
+        Página {{ pagina }} de {{ total_paginas }}
+    </span>
+
     {% if pagina < total_paginas %}
-        <a href="/compras?mes={{ mes }}&busca={{ busca }}&pagina={{ pagina + 1 }}" class="btn-pagina">Proxima &rsaquo;</a>
+
+        <a
+            href="/compras?mes={{ mes }}&busca={{ busca }}&pagina={{ pagina + 1 }}"
+            class="btn-pagina">
+
+            Próxima &rsaquo;
+
+        </a>
+
     {% endif %}
+
 </div>
+
 {% endif %}
+
 {% endblock %}
