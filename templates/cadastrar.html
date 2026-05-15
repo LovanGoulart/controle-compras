@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>➕ Nova Compra</h2>
+
+<form method="POST" id="formCompra" novalidate>
+    <div class="form-group">
+        <label for="categoria">Categoria *</label>
+        <select name="produto" id="categoria" required onchange="atualizarPlaceholder()">
+            <option value="" disabled selected>Selecione uma categoria</option>
+            <option value="Farmácia">Farmácia</option>
+            <option value="Vestuário">Vestuário</option>
+            <option value="Alimentação">Alimentação</option>
+            <option value="Supermercado">Supermercado</option>
+            <option value="Contas da casa">Contas da casa</option>
+            <option value="Compras na internet">Compras na internet</option>
+            <option value="Animais de estimação">Animais de estimação</option>
+            <option value="Despesas com o carro">Despesas com o carro</option>
+            <option value="outros">Outros</option>
+        </select>
+    </div>
+
+    <div class="form-group" id="outro-group" style="display:none;">
+        <label for="outro_categoria">Especifique a categoria *</label>
+        <input type="text" id="outro_categoria" name="outro_categoria" placeholder="Digite a categoria">
+    </div>
+
+    <div class="form-group">
+        <label for="local">Local *</label>
+        <input type="text" id="local" name="local" placeholder="Ex: Supermercado Zaffari" required>
+    </div>
+
+    <div class="form-group">
+        <label for="valor">Valor Total (R$) *</label>
+        <input type="number" step="0.01" min="0.01" name="valor" id="valor" placeholder="Ex: 10.50" required>
+    </div>
+
+    <div class="form-group">
+        <label for="parcelas">Número de Parcelas</label>
+        <input type="number" name="parcelas" id="parcelas" min="1" max="48" value="1" required>
+        <small class="hint">Máximo: 48 parcelas</small>
+    </div>
+
+    <div class="form-group">
+        <label for="data">Data *</label>
+        <input type="date" name="data" id="data" value="{{ hoje.strftime('%Y-%m-%d') }}" required>
+    </div>
+
+    <button type="submit" id="btnSalvar">
+        <i class="bi bi-check-circle"></i> Salvar Compra
+    </button>
+</form>
+
+<script>
+function atualizarPlaceholder() {
+    let categoria = document.getElementById("categoria").value;
+    let localInput = document.getElementById("local");
+    let outroGroup = document.getElementById("outro-group");
+    let outroInput = document.getElementById("outro_categoria");
+
+    let exemplos = {
+        "Fármacia": "Ex: Fármacia São João",
+        "Vestuário": "Ex: Lojas Renner",
+        "Alimentação": "Ex: McDonald's",
+        "Supermercado": "Ex: Supermercado Zaffari",
+        "Contas da casa": "Ex: Conta de luz, Internet...",
+        "Compras na internet": "Ex: Mercado Livre",
+        "Animais de estimação": "Ex: Veterinário, Ração...",
+        "Despesas com o carro": "Ex: Gasolina, Lavagem, Oficina..."
+    };
+
+    if (exemplos[categoria]) {
+        localInput.placeholder = exemplos[categoria];
+    } else {
+        localInput.placeholder = "Digite o local";
+    }
+
+    if (categoria === "outros") {
+        outroGroup.style.display = "block";
+        outroInput.required = true;
+    } else {
+        outroGroup.style.display = "none";
+        outroInput.required = false;
+    }
+}
+
+document.getElementById("formCompra").addEventListener("submit", function(e) {
+    const valor = parseFloat(document.getElementById("valor").value);
+    const parcelas = parseInt(document.getElementById("parcelas").value);
+    const categoria = document.getElementById("categoria").value;
+
+    if (!categoria) {
+        e.preventDefault();
+        alert("Selecione uma categoria");
+        return false;
+    }
+    if (isNaN(valor) || valor <= 0) {
+        e.preventDefault();
+        alert("Valor deve ser maior que zero");
+        return false;
+    }
+    if (parcelas < 1 || parcelas > 48) {
+        e.preventDefault();
+        alert("Numero de parcelas invalido");
+        return false;
+    }
+    document.getElementById("btnSalvar").disabled = true;
+    document.getElementById("btnSalvar").innerHTML = '<i class="bi bi-hourglass-split"></i> Salvando...';
+});
+</script>
+{% endblock %}

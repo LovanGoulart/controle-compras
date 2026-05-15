@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>🛒 Compras</h2>
+
+<form method="GET" id="formFiltro" class="filtro-form">
+    <div class="filtro-row">
+        <input type="month" name="mes" value="{{ mes or '' }}" onchange="this.form.submit();" class="input-month">
+        <input type="text" name="busca" value="{{ busca or '' }}" placeholder="Buscar por local ou produto..." class="input-busca">
+        <button type="submit" class="btn-buscar">Buscar</button>
+        {% if busca %}
+            <a href="/compras?mes={{ mes }}" class="btn-limpar">Limpar</a>
+        {% endif %}
+    </div>
+</form>
+
+<div class="info-bar">
+    <span>{{ total_registros }} compra(s) encontrada(s)</span>
+    <span>Mes: {{ mes_formatado }}</span>
+</div>
+
+<div class="table-container">
+    <table class="tabela">
+        <thead>
+            <tr>
+                <th>Local</th>
+                <th>Produto</th>
+                <th class="valor">Valor (R$)</th>
+                <th>Data</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% if compras and compras|length > 0 %}
+            {% for c in compras %}
+            <tr>
+                <td>{{ c.local }}</td>
+                <td>{{ c.produto }}</td>
+                <td class="valor">
+                    R$ {{ "{:,.2f}".format(c.valor).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                </td>
+                <td>{{ c.data }}</td>
+                <td>
+                    <form method="POST" action="/compra/{{ c.id }}/excluir" class="form-excluir" onsubmit="return confirm('Tem certeza que deseja excluir esta compra?');">
+                        <button type="submit" class="btn-excluir" aria-label="Excluir compra">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="5" style="text-align:center; padding: 30px;">
+                    <i class="bi bi-inbox" style="font-size: 40px; color: #ccc;"></i>
+                    <p style="color: #888; margin-top: 10px;">Nenhuma compra encontrada</p>
+                </td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% if total_paginas > 1 %}
+<div class="paginacao">
+    {% if pagina > 1 %}
+        <a href="/compras?mes={{ mes }}&busca={{ busca }}&pagina={{ pagina - 1 }}" class="btn-pagina">&lsaquo; Anterior</a>
+    {% endif %}
+    <span class="pagina-atual">Pagina {{ pagina }} de {{ total_paginas }}</span>
+    {% if pagina < total_paginas %}
+        <a href="/compras?mes={{ mes }}&busca={{ busca }}&pagina={{ pagina + 1 }}" class="btn-pagina">Proxima &rsaquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

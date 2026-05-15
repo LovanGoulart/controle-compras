@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Cadastro no sistema de controle de compras">
+<title>Cadastro</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #ff6b6b, #ff9f9f);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+.container {
+    background: rgba(255,255,255,0.95);
+    padding: 30px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+h2 { text-align: center; margin-bottom: 25px; color: #333; }
+.mensagem {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 600;
+    animation: slideDown 0.3s ease;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.sucesso { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.erro { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.input-group { position: relative; margin-bottom: 15px; }
+input {
+    width: 100%;
+    padding: 14px 12px;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    font-size: 15px;
+    transition: all 0.3s;
+    outline: none;
+}
+input:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255,107,107,0.15);
+}
+.strength-bar {
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+}
+.strength-bar div { height: 100%; width: 0; transition: all 0.3s; border-radius: 2px; }
+.strength-weak { background: #e74c3c; width: 33%; }
+.strength-medium { background: #f39c12; width: 66%; }
+.strength-strong { background: #27ae60; width: 100%; }
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #ff6b6b;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+button:hover {
+    background: #ff5252;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+}
+button:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+a {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #ff6b6b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s;
+}
+a:hover { text-decoration: underline; }
+.password-requirements {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+.password-requirements li {
+    list-style: none;
+    padding: 3px 0;
+    color: #888;
+}
+.password-requirements li.valid { color: #27ae60; }
+.password-requirements li.valid::before { content: "✓ "; font-weight: bold; }
+.password-requirements li::before { content: "○ "; color: #ccc; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Cadastro</h2>
+    {% if mensagem %}
+        <div class="mensagem {{ tipo }}">{{ mensagem }}</div>
+    {% endif %}
+    <form method="POST" id="formCadastro" novalidate>
+        <div class="input-group">
+            <input type="text" name="nome" id="nome" placeholder="Seu nome completo" required minlength="3">
+        </div>
+        <div class="input-group">
+            <input type="email" name="email" id="email" placeholder="E-mail" required>
+        </div>
+        <div class="input-group">
+            <input type="password" name="senha" id="senha" placeholder="Senha" required>
+            <div class="strength-bar"><div id="strength"></div></div>
+        </div>
+        <ul class="password-requirements" id="req-list">
+            <li id="req-length">Mínimo 8 caracteres</li>
+            <li id="req-upper">Uma letra maiúscula</li>
+            <li id="req-lower">Uma letra minúscula</li>
+            <li id="req-number">Um número</li>
+        </ul>
+        <button type="submit" id="btnCadastrar">Cadastrar</button>
+    </form>
+    <a href="/login">Já tenho conta</a>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("formCadastro");
+    const btn = document.getElementById("btnCadastrar");
+    const senhaInput = document.getElementById("senha");
+    const strengthBar = document.getElementById("strength");
+
+    senhaInput.addEventListener("input", function() {
+        const senha = this.value;
+        let score = 0;
+        document.getElementById("req-length").classList.toggle("valid", senha.length >= 8);
+        document.getElementById("req-upper").classList.toggle("valid", /[A-Z]/.test(senha));
+        document.getElementById("req-lower").classList.toggle("valid", /[a-z]/.test(senha));
+        document.getElementById("req-number").classList.toggle("valid", /[0-9]/.test(senha));
+        if (senha.length >= 8) score++;
+        if (/[A-Z]/.test(senha)) score++;
+        if (/[a-z]/.test(senha)) score++;
+        if (/[0-9]/.test(senha)) score++;
+        strengthBar.className = "";
+        if (score <= 1) strengthBar.classList.add("strength-weak");
+        else if (score <= 3) strengthBar.classList.add("strength-medium");
+        else strengthBar.classList.add("strength-strong");
+    });
+
+    form.addEventListener("submit", function(e) {
+        const senha = senhaInput.value;
+        if (senha.length < 8 || !/[A-Z]/.test(senha) || !/[a-z]/.test(senha) || !/[0-9]/.test(senha)) {
+            e.preventDefault();
+            alert("A senha nao atende aos requisitos minimos de seguranca.");
+            return false;
+        }
+        btn.disabled = true;
+        btn.innerText = "Cadastrando...";
+    });
+
+    {% if tipo == "sucesso" %}
+        setTimeout(function() { window.location.href = "/login"; }, 2000);
+    {% endif %}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+.mes-navegacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+}
+.btn-mes {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #f3f3f3;
+    color: #444;
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    font-weight: bold;
+    transition: 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.btn-mes:hover { background: #ff4d6d; color: white; }
+.mes-atual {
+    font-size: 20px;
+    font-weight: 700;
+    color: #222;
+    min-width: 170px;
+    text-align: center;
+}
+.totais {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 15px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.btn-add {
+    font-size: 45px;
+    color: #ff4d6d;
+    text-decoration: none;
+    transition: 0.2s;
+}
+.btn-add:hover { transform: scale(1.1); }
+.grafico-container {
+    width: 100%;
+    max-width: 450px;
+    height: 400px;
+    margin: auto;
+}
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+}
+.empty-state i { font-size: 60px; color: #ddd; margin-bottom: 15px; }
+</style>
+
+<h2>🏠 Controle de Compras</h2>
+<hr>
+
+{% set ano = mes.split('-')[0]|int %}
+{% set numero_mes = mes.split('-')[1]|int %}
+{% set mes_anterior = numero_mes - 1 %}
+{% set ano_anterior = ano %}
+{% if mes_anterior == 0 %}
+    {% set mes_anterior = 12 %}
+    {% set ano_anterior = ano - 1 %}
+{% endif %}
+{% set proximo_mes = numero_mes + 1 %}
+{% set proximo_ano = ano %}
+{% if proximo_mes == 13 %}
+    {% set proximo_mes = 1 %}
+    {% set proximo_ano = ano + 1 %}
+{% endif %}
+
+<div class="mes-navegacao">
+    <a href="/?mes={{ ano_anterior }}-{{ '%02d' % mes_anterior }}" class="btn-mes" aria-label="Mês anterior">&#8249;</a>
+    <div class="mes-atual">{{ mes_formatado }}</div>
+    <a href="/?mes={{ proximo_ano }}-{{ '%02d' % proximo_mes }}" class="btn-mes" aria-label="Próximo mês">&#8250;</a>
+</div>
+
+<div class="totais">
+    <div>
+        <small style="color: #888;">Total do mês</small>
+        <p style="font-size: 28px; margin: 5px 0;">
+            <strong style="color: #ff4d6d;">
+                R$ {{ "{:,.2f}".format(total_mes).replace(",", "X").replace(".", ",").replace("X", ".") }}
+            </strong>
+        </p>
+    </div>
+    <a href="/cadastrar" class="btn-add" aria-label="Nova compra"><i class="bi bi-plus-circle-fill"></i></a>
+</div>
+
+<hr>
+
+{% if nomes and valores %}
+<div class="grafico-container">
+    <canvas id="graficoIndex"></canvas>
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-pie-chart"></i>
+    <p>Nenhuma compra registrada neste mês</p>
+    <a href="/cadastrar" style="color: #ff4d6d; text-decoration: none; font-weight: 600;">Registrar primeira compra &rarr;</a>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let nomes = {{ nomes | tojson }};
+    let valores = {{ valores | tojson }};
+    if (nomes.length > 0) {
+        const ctx = document.getElementById('graficoIndex');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: nomes,
+                datasets: [{
+                    data: valores,
+                    backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40', '#8dd17e', '#d65db1'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, padding: 15, font: { size: 13 }, usePointStyle: true }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let valor = context.raw;
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let percentual = ((valor / total) * 100).toFixed(1);
+                                return context.label + ": R$ " + valor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) + " (" + percentual + "%)";
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

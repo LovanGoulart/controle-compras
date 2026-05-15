@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Login no sistema de controle de compras">
+<title>Login</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #ff6b6b, #ff9f9f);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.container {
+    background: rgba(255,255,255,0.95);
+    padding: 35px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    text-align: center;
+}
+h2 { margin-bottom: 25px; color: #333; font-size: 24px; }
+.mensagem {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    animation: slideDown 0.3s ease;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.erro { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.input-group { position: relative; margin-bottom: 18px; }
+input {
+    width: 100%;
+    padding: 14px 12px;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    outline: none;
+    font-size: 15px;
+    transition: all 0.3s;
+}
+input:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255,107,107,0.15);
+}
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #ff6b6b;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 5px;
+}
+button:hover {
+    background: #ff5252;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+}
+button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+a {
+    display: block;
+    margin-top: 20px;
+    color: #ff6b6b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s;
+}
+a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Login</h2>
+    {% if mensagem %}
+        <div class="mensagem {{ tipo }}">{{ mensagem }}</div>
+    {% endif %}
+    <form method="POST" id="formLogin" novalidate>
+        <div class="input-group">
+            <input type="email" name="email" placeholder="E-mail" required autocomplete="email">
+        </div>
+        <div class="input-group">
+            <input type="password" name="senha" placeholder="Senha" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="btnLogin">Entrar</button>
+    </form>
+    <a href="/cadastro">Criar conta</a>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("formLogin");
+    const btn = document.getElementById("btnLogin");
+    form.addEventListener("submit", function() {
+        btn.disabled = true;
+        btn.innerText = "Entrando...";
+    });
+});
+</script>
+</body>
+</html>

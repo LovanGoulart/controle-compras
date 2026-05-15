@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="pagina-relatorio">
+    <h2>📋 Relatório</h2>
+
+    <form method="GET" id="formFiltro">
+        <input type="month" name="mes" value="{{ mes or '' }}" onchange="this.form.submit();" class="input-month">
+    </form>
+
+    <div class="resumo-cards">
+        <div class="card-resumo">
+            <i class="bi bi-calendar-month"></i>
+            <div>
+                <small>Total no Mês</small>
+                <strong>R$ {{ "{:,.2f}".format(total).replace(",", "X").replace(".", ",").replace("X", ".") }}</strong>
+            </div>
+        </div>
+        <div class="card-resumo">
+            <i class="bi bi-calendar-year"></i>
+            <div>
+                <small>Total no Ano</small>
+                <strong>R$ {{ "{:,.2f}".format(total_anual).replace(",", "X").replace(".", ",").replace("X", ".") }}</strong>
+            </div>
+        </div>
+        <div class="card-resumo">
+            <i class="bi bi-graph-up"></i>
+            <div>
+                <small>Média Mensal</small>
+                <strong>R$ {{ "{:,.2f}".format(media_mensal).replace(",", "X").replace(".", ",").replace("X", ".") }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="area-tabela">
+        <table class="tabela">
+            <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th class="valor">Total (R$)</th>
+                    <th>% do Total</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% if gastos %}
+                {% for g in gastos %}
+                <tr>
+                    <td>{{ g['produto'] }}</td>
+                    <td class="valor">
+                        R$ {{ "{:,.2f}".format(g['total']|float).replace(",", "X").replace(".", ",").replace("X", ".") }}
+                    </td>
+                    <td class="percentual">
+                        {% if total > 0 %}
+                            {{ "%.1f"|format((g['total']|float / total) * 100) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" style="text-align:center; padding: 30px;">
+                        <i class="bi bi-inbox" style="font-size: 40px; color: #ccc;"></i>
+                        <p style="color: #888; margin-top: 10px;">Nenhum gasto encontrado</p>
+                    </td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
